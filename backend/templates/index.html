@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Family Tree - CRUD Mini</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    input, select { margin: 5px; padding: 5px; }
+    button { margin: 3px; padding: 5px 10px; }
+    h2 { margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <h1>Family Tree - CRUD Mini</h1>
+  <div id="root"></div>
+
+  {% raw %}
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- tiện ích xử lý ngày ---
+    function normalizeDateAndPrecision(dateStr) {
+      if (!dateStr) return { date: null, precision: "unknown" };
+      const parts = dateStr.split("-");
+      if (parts.length === 1 && /^\d{4}$/.test(parts[0])) {
+        return { date: parts[0] + "-01-01", precision: "year" };
+      }
+      if (parts.length === 2 && /^\d{4}$/.test(parts[0]) && /^\d{2}$/.test(parts[1])) {
+        return { date: parts[0] + "-" + parts[1] + "-01", precision: "month" };
+      }
+      if (parts.length === 3) {
+        return { date: dateStr, precision: "exact" };
+      }
+      return { date: null, precision: "unknown" };
+    }
+
+    function toYMDFromApi(v) {
+      if (!v) return "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+      const d = new Date(v);
+      if (!isNaN(d)) return d.toISOString().slice(0, 10);
+      return "";
+    }
+
+    // --- tiện ích lấy năm từ birth_date ---
+    function getYear(dateStr) {
+      if (!dateStr) return 9999;   // nếu null thì đẩy xuống cuối danh sách
+      const d = new Date(dateStr);
+      if (!isNaN(d)) return d.getFullYear();
+    // fallback nếu không parse được (ví dụ chỉ có "1930")
+      if (/^\d{4}/.test(dateStr)) return parseInt(dateStr.substring(0,4));
+      return 9999;
+}
+
+    // --- load và sort Persons cho dropdown ---
+    function useSortedPersons() {
+      const [persons, setPersons] = React.useState([]);
+      React.useEffect(() => {
+        fetch("/api/person/")
+         .then(r => r.json())
+         .then(data => {
+           const sorted = [...data].sort((a, b) => {
+             const ay = getYear(a.birth_date);
+             const by = getYear(b.birth_date);
+             if (ay !== by) return ay - by;
+             const an = [a.sur_name, a.middle_name, a.first_name].filter(Boolean).join(" ").toLowerCase();
+             const bn = [b.sur_name, b.middle_name, b.first_name].filter(Boolean).join(" ").toLowerCase();
+             return an.localeCompare(bn);
+           });
+           setPersons(sorted);
+         });
+      }, []);
+      return persons;
+    }
+
+
+    const displayName = (p) =>
+      [p.sur_name, p.middle_name, p.first_name].filter(Boolean).join(" ");
+
+    // --- Person CRUD ---
+    function Persons() {
+      const emptyForm = { sur_name:"", last_name:"", middle_name:"", first_name:"", gender:"unknown", birth_date:"", death_date:"" };
+      const [form, setForm] = useState(emptyForm);
+      const [rows, setRows] = useState([]);
+      const [selectedId, setSelectedId] = useState(null);
+
+      const loadData = () => { fetch("/api/person/").then(res => res.json()).then(setRows); };
+      useEffect(loadData, []);
+      const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+      const prepareBody = body => {
+        const result = { ...body };
+        const bd = (result.birth_date || "").trim();
+        if (bd) { const n = normalizeDateAndPrecision(bd); result.birth_date = n.date; result.birth_date_precision = n.precision; }
+        const dd = (result.death_date || "").trim();
+        if (dd) { const n = normalizeDateAndPrecision(dd); result.death_date = n.date; result.death_date_precision = n.precision; }
+        return result;
+      };
+
+      const handleAdd = () => {
+        const body = prepareBody({ ...form });
+        fetch("/api/person/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+          .then(()=>{loadData();setForm(emptyForm);});
+      };
+
+      const handleUpdate = () => {
+        if(!selectedId){alert("Chưa chọn bản ghi để update");return;}
+        const body=prepareBody({ ...form });
+        fetch(`/api/person/${selectedId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+          .then(()=>{loadData();setForm(emptyForm);setSelectedId(null);});
+      };
+
+      const handleEdit = p => {
+        setForm({
+          sur_name: p.sur_name || "", last_name: p.last_name || "", middle_name: p.middle_name || "",
+          first_name: p.first_name || "", gender: p.gender || "unknown",
+          birth_date: toYMDFromApi(p.birth_date), death_date: toYMDFromApi(p.death_date)
+        });
+        setSelectedId(p.person_id);
+      };
+
+      const handleDelete = id => { fetch(`/api/person/${id}`,{method:"DELETE"}).then(loadData); };
+
+      return (<div><h2>Persons</h2>
+        <div>
+          <input name="sur_name" placeholder="sur_name" value={form.sur_name} onChange={handleChange}/>
+          <input name="last_name" placeholder="last_name" value={form.last_name} onChange={handleChange}/>
+          <input name="middle_name" placeholder="middle_name" value={form.middle_name} onChange={handleChange}/>
+          <input name="first_name" placeholder="first_name" value={form.first_name} onChange={handleChange}/>
+          <select name="gender" value={form.gender} onChange={handleChange}>
+            <option value="male">male</option><option value="female">female</option><option value="other">other</option><option value="unknown">unknown</option>
+          </select>
+          <input name="birth_date" placeholder="YYYY / YYYY-MM / YYYY-MM-DD" value={form.birth_date} onChange={handleChange}/>
+          <input name="death_date" placeholder="YYYY / YYYY-MM / YYYY-MM-DD" value={form.death_date} onChange={handleChange}/>
+          <button onClick={handleAdd}>Add</button><button onClick={handleUpdate}>Update</button>
+        </div>
+        <table><thead><tr>
+          <th>ID</th><th>sur_name</th><th>last_name</th><th>middle_name</th><th>first_name</th>
+          <th>gender</th><th>birth_date</th><th>death_date</th><th>Actions</th>
+        </tr></thead><tbody>
+          {rows.map(r=><tr key={r.person_id}>
+            <td>{r.person_id}</td><td>{r.sur_name}</td><td>{r.last_name}</td><td>{r.middle_name}</td><td>{r.first_name}</td>
+            <td>{r.gender}</td><td>{toYMDFromApi(r.birth_date)}</td><td>{toYMDFromApi(r.death_date)}</td>
+            <td><button onClick={()=>handleEdit(r)}>Edit</button><button onClick={()=>handleDelete(r.person_id)}>Delete</button></td>
+          </tr>)}
+        </tbody></table></div>);
+    }
+
+    // --- Marriage CRUD ---
+    function Marriages() {
+      const persons = useSortedPersons();
+      const emptyForm = { spouse_a_id:"", spouse_b_id:"", start_date:"", end_date:"", status:"married", ceremony_type:"civil", location:"", notes:"" };
+      const [form,setForm]=useState(emptyForm); const [rows,setRows]=useState([]); const [selectedId,setSelectedId]=useState(null);
+
+      const loadData=()=>{fetch("/api/marriage/").then(r=>r.json()).then(setRows);};
+      useEffect(loadData,[]);
+      const handleChange=e=>setForm({...form,[e.target.name]:e.target.value});
+
+      const prepareBody=b=>{const result={...b};
+        if(result.start_date){const n=normalizeDateAndPrecision(result.start_date);result.start_date=n.date;result.start_date_precision=n.precision;}
+        if(result.end_date){const n=normalizeDateAndPrecision(result.end_date);result.end_date=n.date;result.end_date_precision=n.precision;}
+        return result;};
+
+      const handleAdd=()=>{const body=prepareBody({...form});
+        fetch("/api/marriage/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(()=>{loadData();setForm(emptyForm);});};
+
+      const handleUpdate=()=>{if(!selectedId)return;const body=prepareBody({...form});
+        fetch(`/api/marriage/${selectedId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(()=>{loadData();setForm(emptyForm);setSelectedId(null);});};
+
+      const handleEdit=r=>{setForm({
+        spouse_a_id:r.spouse_a_id??"", spouse_b_id:r.spouse_b_id??"",
+        start_date:toYMDFromApi(r.start_date), end_date:toYMDFromApi(r.end_date),
+        status:r.status||"married", ceremony_type:r.ceremony_type||"civil", location:r.location||"", notes:r.notes||""
+      });setSelectedId(r.id);};
+
+      const handleDelete=id=>{fetch(`/api/marriage/${id}`,{method:"DELETE"}).then(loadData);};
+
+      return (<div><h2>Marriages</h2>
+        <div>
+          <select name="spouse_a_id" value={form.spouse_a_id} onChange={handleChange}>
+            <option value="">-- chọn Spouse A --</option>
+            {persons.map(p=><option key={p.person_id} value={p.person_id}>
+              {p.person_id} - {displayName(p)} ({p.birth_date ? new Date(p.birth_date).getFullYear() : "?"})
+            </option>)}
+          </select>
+          <select name="spouse_b_id" value={form.spouse_b_id} onChange={handleChange}>
+            <option value="">-- chọn Spouse B --</option>
+            {persons.map(p=><option key={p.person_id} value={p.person_id}>
+              {p.person_id} - {displayName(p)} ({p.birth_date ? new Date(p.birth_date).getFullYear() : "?"})
+            </option>)}
+          </select>
+          <input name="start_date" placeholder="YYYY / YYYY-MM / YYYY-MM-DD" value={form.start_date} onChange={handleChange}/>
+          <input name="end_date" placeholder="YYYY / YYYY-MM / YYYY-MM-DD" value={form.end_date} onChange={handleChange}/>
+          <select name="status" value={form.status} onChange={handleChange}>
+            <option value="married">married</option><option value="separated">separated</option><option value="divorced">divorced</option><option value="widowed">widowed</option>
+          </select>
+          <select name="ceremony_type" value={form.ceremony_type} onChange={handleChange}>
+            <option value="civil">civil</option><option value="religious">religious</option><option value="customary">customary</option>
+          </select>
+          <input name="location" placeholder="location" value={form.location} onChange={handleChange}/>
+          <input name="notes" placeholder="notes" value={form.notes} onChange={handleChange}/>
+          <button onClick={handleAdd}>Add</button><button onClick={handleUpdate}>Update</button>
+        </div>
+        <table><thead><tr>
+          <th>ID</th><th>spouse_a_id</th><th>spouse_b_id</th><th>start_date</th><th>end_date</th><th>status</th><th>ceremony_type</th><th>location</th><th>notes</th><th>Actions</th>
+        </tr></thead><tbody>{rows.map(r=>
+          <tr key={r.id}><td>{r.id}</td><td>{r.spouse_a_id}</td><td>{r.spouse_b_id}</td>
+          <td>{toYMDFromApi(r.start_date)}</td><td>{toYMDFromApi(r.end_date)}</td>
+          <td>{r.status}</td><td>{r.ceremony_type}</td><td>{r.location}</td><td>{r.notes}</td>
+          <td><button onClick={()=>handleEdit(r)}>Edit</button><button onClick={()=>handleDelete(r.id)}>Delete</button></td></tr>)}
+        </tbody></table></div>);
+    }
+
+    // --- Lineage CRUD ---
+    function Lineages() {
+      const emptyForm={name:"",original_place:"",notes:""};const[form,setForm]=useState(emptyForm);
+      const[rows,setRows]=useState([]);const[selectedId,setSelectedId]=useState(null);
+      const loadData=()=>{fetch("/api/lineage/").then(r=>r.json()).then(setRows);};useEffect(loadData,[]);
+      const handleChange=e=>setForm({...form,[e.target.name]:e.target.value});
+      const handleAdd=()=>{fetch("/api/lineage/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
+        .then(()=>{loadData();setForm(emptyForm);});};
+      const handleUpdate=()=>{if(!selectedId)return;fetch(`/api/lineage/${selectedId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
+        .then(()=>{loadData();setForm(emptyForm);setSelectedId(null);});};
+      const handleEdit=r=>{setForm({name:r.name||"",original_place:r.original_place||"",notes:r.notes||""});setSelectedId(r.id);};
+      const handleDelete=id=>{fetch(`/api/lineage/${id}`,{method:"DELETE"}).then(loadData);};
+      return(<div><h2>Lineages</h2>
+        <div>
+          <input name="name" placeholder="name" value={form.name} onChange={handleChange}/>
+          <input name="original_place" placeholder="original_place" value={form.original_place} onChange={handleChange}/>
+          <input name="notes" placeholder="notes" value={form.notes} onChange={handleChange}/>
+          <button onClick={handleAdd}>Add</button><button onClick={handleUpdate}>Update</button>
+        </div>
+        <table><thead><tr><th>ID</th><th>name</th><th>original_place</th><th>notes</th><th>Actions</th></tr></thead>
+          <tbody>{rows.map(r=><tr key={r.id}><td>{r.id}</td><td>{r.name}</td><td>{r.original_place}</td><td>{r.notes}</td>
+            <td><button onClick={()=>handleEdit(r)}>Edit</button><button onClick={()=>handleDelete(r.id)}>Delete</button></td></tr>)}</tbody></table>
+      </div>);
+    }
+
+    // --- Parent_Child CRUD ---
+    function ParentChild() {
+      const persons = useSortedPersons();
+      const emptyForm={parent_id:"",child_id:"",type:"",notes:""};const[form,setForm]=useState(emptyForm);
+      const[rows,setRows]=useState([]);const[selectedId,setSelectedId]=useState(null);
+      const loadData=()=>{fetch("/api/parent_child/").then(r=>r.json()).then(setRows);};useEffect(loadData,[]);
+      const handleChange=e=>setForm({...form,[e.target.name]:e.target.value});
+      const handleAdd=()=>{fetch("/api/parent_child/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
+        .then(()=>{loadData();setForm(emptyForm);});};
+      const handleUpdate=()=>{if(!selectedId)return;fetch(`/api/parent_child/${selectedId}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)})
+        .then(()=>{loadData();setForm(emptyForm);setSelectedId(null);});};
+      const handleEdit=r=>{setForm({parent_id:r.parent_id??"",child_id:r.child_id??"",type:r.type||"FATHER",notes:r.notes||""});setSelectedId(r.id);};
+      const handleDelete=id=>{fetch(`/api/parent_child/${id}`,{method:"DELETE"}).then(loadData);};
+      return(<div><h2>Parent_Child</h2>
+        <div>
+          <select name="parent_id" value={form.parent_id} onChange={handleChange}>
+            <option value="">-- chọn Parent --</option>
+            {persons.map(p=><option key={p.person_id} value={p.person_id}>
+              {p.person_id} - {displayName(p)} ({p.birth_date ? new Date(p.birth_date).getFullYear() : "?"})
+            </option>)}
+          </select>
+          <select name="child_id" value={form.child_id} onChange={handleChange}>
+            <option value="">-- chọn Child --</option>
+            {persons.map(p=><option key={p.person_id} value={p.person_id}>
+              {p.person_id} - {displayName(p)} ({p.birth_date ? new Date(p.birth_date).getFullYear() : "?"})
+            </option>)}
+          </select>
+          <select name="type" value={form.type} onChange={handleChange}>
+            <option value="FATHER">father</option>
+            <option value="MOTHER">mother</option>
+          </select>
+          <input name="notes" placeholder="notes" value={form.notes} onChange={handleChange}/>
+          <button onClick={handleAdd}>Add</button><button onClick={handleUpdate}>Update</button>
+        </div>
+        <table><thead><tr>
+          <th>ID</th><th>parent_id</th><th>child_id</th><th>type</th><th>notes</th><th>Actions</th>
+        </tr></thead><tbody>{rows.map(r=>
+          <tr key={r.id}><td>{r.id}</td><td>{r.parent_id}</td><td>{r.child_id}</td><td>{r.type}</td><td>{r.notes}</td>
+          <td><button onClick={()=>handleEdit(r)}>Edit</button><button onClick={()=>handleDelete(r.id)}>Delete</button></td></tr>)}
+        </tbody></table></div>);
+    }
+
+    // --- App render ---
+    function App() {
+      return (
+        <div>
+          <Persons />
+          <Marriages />
+          <Lineages />
+          <ParentChild />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+  {% endraw %}
+</body>
+</html>

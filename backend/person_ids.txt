@@ -1,0 +1,121 @@
+===== PERSON LIST =====
+    4 |   male | Giuse Trần Ngọc Quí
+    5 |   male | Andre Trần Ngọc Kính
+    7 |   male | Phanxicô Xaviê Trần  Tấn
+    8 | female | Maria Trần Thị Thủy
+   10 | female | Maria Trần Thị Lượng
+   11 |   male | Ephrem Trần Bửu Tân
+   12 |   male | Gioan Maria Vianney Trần Bảo Truyền
+   13 | female | Anna Phan Hồng Nhi
+   14 |   male | Augustinô Trần Quy Nguyên Khôi
+   15 |   male | Dominico Trần Ngọc Dũng
+   18 |   male | Giuse Trần Ngọc Chánh
+   19 |   male | Marthia Trần Ngọc Trí
+   21 |   male | Luca Trần Ngọc Tin
+   22 | female | Anna Trần Thị Minh Tâm
+   24 |   male | Giuse Trần Bửu Văn Bình
+   25 | female | Elizabeth Trần Bửu Trúc Linh
+   30 | female | Têrêxa Nguyễn Thị Hà
+   31 |   male | An-tôn  Trần Tuấn Mậu
+   32 | female | Maria Nguyễn Thị Hoa
+   33 | female | Maria Đào Thị Anh Thư
+   34 |   male |  Trần Văn Pháp
+   35 | female | Diệu Tích Nguyễn Thị Bốn
+   36 |   male |  Trần  Xuyên
+   37 | female |  Dương Thị Mẹo
+   39 | female | Hellen Trần Thị Thu Thủy
+   40 | female | Têrêxa Maria Trần Thị Diễm Ly
+   41 | female |  Trần Ngọc Thanh Nga
+   42 | female |  Trần Bửu Quỳnh Anh
+   45 |   male |  Hồ Văn Vui
+   47 | female | Maria Nguyễn Thị Thanh
+   50 |   male |  Trần   Kỳ
+   51 |   male |  Trần  Kỷ
+   54 |   male |  Trần  Lực
+   55 |   male |  Trần   Lự
+   60 | female |  Trần Thị Lục
+   63 | female |  Trần Thị Lục
+   64 |   male |  Trần  Lự
+   65 |   male |  Trần  Công Lựu
+   66 | female |  Trần Thị Lệ
+   67 |   male | Anton Trần Văn Du
+   68 |   male |  t Văn Du
+   69 | female | Maria Thái Thị Tám
+   70 | female |  Nguyễn Thanh Hằng
+   71 | female | Maria Cao  Thị Kim Tuyền
+   72 |   male | Giuse Trần Cao Anh Duy
+   73 | female |  Phạm Trang Anh Thư
+   74 |   male |  Trần Thiên Diệp
+   75 |   male | Giuse Trần Cao Minh Tân
+   76 | female | Maria Lê Thị Thùy Dương
+   77 | female | Têrêxa Trần Khánh Vy
+   78 |   male | Anton Trần Cao Quang Lâm
+   79 |   male |  Huỳnh Văn Khải
+   80 | female |  Huỳnh Ngọc Vân Nhi
+   81 |   male |  Huỳnh Ngọc Vân Thiên
+   82 | female | Maria Trần Bửu Hiền Hòa
+   83 |   male |  Nguyễn Kiến Thơ
+   84 | female |  Bùi Thị Ánh Tuyết
+   85 |   male |  Trần  Lự
+
+===== MARRIAGE LIST =====
+   15 | 5 (male) Andre Ngọc Kính  <->  8 (female) Maria Trần Thị Thủy  [married]
+   16 | 11 (male) Ephrem Bửu Tân  <->  13 (female) Anna Phan Hồng Nhi  [married]
+   18 | 7 (male) Phanxicô Xaviê  Tấn  <->  10 (female) Maria Trần Thị Lượng  [married]
+   19 | 30 (female) Têrêxa Thị Hà  <->  31 (male) An-tôn  Trần Tuấn Mậu  [married]
+   20 | 34 (male)  Văn Pháp  <->  35 (female) Diệu Tích Nguyễn Thị Bốn  [married]
+   21 | 36 (male)   Xuyên  <->  37 (female)  Dương Thị Mẹo  [married]
+   22 | 18 (male) Giuse Ngọc Chánh  <->  40 (female) Têrêxa Maria Trần Thị Diễm Ly  [married]
+   23 | 21 (male) Luca Ngọc Tin  <->  32 (female) Maria Nguyễn Thị Hoa  [married]
+   24 | 12 (male) Gioan Maria Vianney Bảo Truyền  <->  33 (female) Maria Đào Thị Anh Thư  [married]
+   25 | 22 (female) Anna Thị Minh Tâm  <->  45 (male)  Hồ Văn Vui  [married]
+   26 | 15 (male) Dominico Ngọc Dũng  <->  47 (female) Maria Nguyễn Thị Thanh  [married]
+   27 | 5 (male) Andre Ngọc Kính  <->  70 (female)  Nguyễn Thanh Hằng  [separated]
+   30 | 67 (male) Anton Văn Du  <->  71 (female) Maria Cao  Thị Kim Tuyền  [married]
+   31 | 72 (male) Giuse Cao Anh Duy  <->  73 (female)  Phạm Trang Anh Thư  [married]
+   32 | 75 (male) Giuse Cao Minh Tân  <->  76 (female) Maria Lê Thị Thùy Dương  [married]
+   33 | 41 (female)  Ngọc Thanh Nga  <->  79 (male)  Huỳnh Văn Khải  [divorced]
+
+===== PARENT - CHILD LIST =====
+5 (male) Andre Trần Ngọc Kính  ->  11 (male) Ephrem Bửu Tân
+5 (male) Andre Trần Ngọc Kính  ->  12 (male) Gioan Maria Vianney Bảo Truyền
+5 (male) Andre Trần Ngọc Kính  ->  41 (female)  Ngọc Thanh Nga
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  4 (male) Giuse Ngọc Quí
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  5 (male) Andre Ngọc Kính
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  15 (male) Dominico Ngọc Dũng
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  18 (male) Giuse Ngọc Chánh
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  19 (male) Marthia Ngọc Trí
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  21 (male) Luca Ngọc Tin
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  22 (female) Anna Thị Minh Tâm
+7 (male) Phanxicô Xaviê Trần  Tấn  ->  39 (female) Hellen Thị Thu Thủy
+8 (female) Maria Trần Thị Thủy  ->  11 (male) Ephrem Bửu Tân
+8 (female) Maria Trần Thị Thủy  ->  12 (male) Gioan Maria Vianney Bảo Truyền
+10 (female) Maria Trần Thị Lượng  ->  4 (male) Giuse Ngọc Quí
+10 (female) Maria Trần Thị Lượng  ->  5 (male) Andre Ngọc Kính
+10 (female) Maria Trần Thị Lượng  ->  15 (male) Dominico Ngọc Dũng
+10 (female) Maria Trần Thị Lượng  ->  18 (male) Giuse Ngọc Chánh
+10 (female) Maria Trần Thị Lượng  ->  19 (male) Marthia Ngọc Trí
+10 (female) Maria Trần Thị Lượng  ->  21 (male) Luca Ngọc Tin
+10 (female) Maria Trần Thị Lượng  ->  22 (female) Anna Thị Minh Tâm
+10 (female) Maria Trần Thị Lượng  ->  39 (female) Hellen Thị Thu Thủy
+11 (male) Ephrem Trần Bửu Tân  ->  14 (male) Augustinô Quy Nguyên Khôi
+13 (female) Anna Phan Hồng Nhi  ->  14 (male) Augustinô Quy Nguyên Khôi
+18 (male) Giuse Trần Ngọc Chánh  ->  24 (male) Giuse Bửu Văn Bình
+18 (male) Giuse Trần Ngọc Chánh  ->  25 (female) Elizabeth Bửu Trúc Linh
+18 (male) Giuse Trần Ngọc Chánh  ->  42 (female)  Bửu Quỳnh Anh
+30 (female) Têrêxa Nguyễn Thị Hà  ->  8 (female) Maria Thị Thủy
+31 (male) An-tôn  Trần Tuấn Mậu  ->  8 (female) Maria Thị Thủy
+34 (male)  Trần Văn Pháp  ->  7 (male) Phanxicô Xaviê  Tấn
+35 (female) Diệu Tích Nguyễn Thị Bốn  ->  7 (male) Phanxicô Xaviê  Tấn
+36 (male)  Trần  Xuyên  ->  10 (female) Maria Thị Lượng
+37 (female)  Dương Thị Mẹo  ->  10 (female) Maria Thị Lượng
+40 (female) Têrêxa Maria Trần Thị Diễm Ly  ->  24 (male) Giuse Bửu Văn Bình
+40 (female) Têrêxa Maria Trần Thị Diễm Ly  ->  25 (female) Elizabeth Bửu Trúc Linh
+40 (female) Têrêxa Maria Trần Thị Diễm Ly  ->  42 (female)  Bửu Quỳnh Anh
+67 (male) Anton Trần Văn Du  ->  72 (male) Giuse Cao Anh Duy
+67 (male) Anton Trần Văn Du  ->  75 (male) Giuse Cao Minh Tân
+70 (female)  Nguyễn Thanh Hằng  ->  41 (female)  Ngọc Thanh Nga
+71 (female) Maria Cao  Thị Kim Tuyền  ->  72 (male) Giuse Cao Anh Duy
+71 (female) Maria Cao  Thị Kim Tuyền  ->  75 (male) Giuse Cao Minh Tân
+72 (male) Giuse Trần Cao Anh Duy  ->  74 (male)  Thiên Diệp
+73 (female)  Phạm Trang Anh Thư  ->  74 (male)  Thiên Diệp

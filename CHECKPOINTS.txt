@@ -1,0 +1,55 @@
+───────────────────────────────────────────────
+📘 FAMILY TREE PROJECT – CHECKPOINT HISTORY
+───────────────────────────────────────────────
+Lưu ý: Các checkpoint này được tạo tự động trong quá trình phát triển.
+Bạn có thể mở lại dự án tại đúng thời điểm bằng cách nhập lệnh:
+
+👉  Tiếp tục dự án từ checkpoint [Tên checkpoint]
+───────────────────────────────────────────────
+
+🟩 1️⃣ FamilyTreeProject-Frontend     (13/09/2025)
+    → Khởi tạo giao diện React + Flask; hoàn thiện bố cục cơ bản.
+
+🟩 2️⃣ FamilyTreeProject-dateUtils    (30/09/2025)
+    → Tạo file utils/dateUtils.js xử lý chuẩn ngày tháng (VN & ISO).
+
+🟩 3️⃣ FamilyTreeProject-ParentChildValidationFinal  (12/10/2025)
+    → Form Quan Hệ Cha–Con hoàn thiện: kiểm tra cha mẹ sinh sau con,
+      chặn tự tham chiếu, vòng lặp nhiều đời, quan hệ ngược chiều.
+
+🟩 4️⃣ FamilyTreeProject-MarriageParentBirthYear  (13/10/2025)
+    → Form Hôn Nhân hiển thị năm sinh sau tên; chuẩn bị đồng bộ
+      logic tương tự cho form cha–con.
+
+🟩 5️⃣ FamilyTreeProject-AvatarStructureSetup  (18/10/2025)
+    → Tạo thư mục:
+         backend/static/avatars/
+         backend/static/avatars/temp/
+      + 3 ảnh mặc định:
+         default_male.png, default_female.png, default_other.png
+
+🟩 6️⃣ FamilyTreeProject-NuclearFamilyV1  (19/10/2025)
+    → TreePage hiển thị cây gia đình hạt nhân: ông bà – vợ chồng – con cái
+      với avatar, năm sinh/mất và bố cục cân đối.
+
+🟩 7️⃣ FamilyTreeProject-NavbarHomeClean  (22/10/2025)
+    → Trang Home giữ hình trống đồng & slogan, bỏ toàn bộ nút điều hướng.
+      Navbar gộp đầy đủ các nút: Trang Chủ, Thành Viên, Cây Gia Phả,
+      Quan Hệ Cha–Con, Quan Hệ Hôn Nhân, Tìm Quan Hệ, Thêm Thành Viên.
+      Viewer bị chặn truy cập vào form thêm.
+
+🟩 8️⃣ FamilyTreeProject-NavbarAnnouncement  (22/10/2025)
+    → Navbar.jsx (v6.1): thêm nút 🔔 “Thông Báo” dẫn đến /announcement.
+      Thêm file AnnouncementPage.jsx (v2.0-auto):
+        - Hiển thị thông báo tự động (Giỗ, Sinh nhật, Kỷ niệm cưới)
+        - Dữ liệu lấy từ ngày sinh, ngày mất, ngày kết hôn
+        - Ưu tiên hiển thị ngày giỗ (tôn kính tổ tiên)
+      Cấu trúc frontend + backend đồng bộ, sẵn sàng mở rộng API announcement.py.
+	  
+
+───────────────────────────────────────────────
+📂 File này được lưu trong thư mục gốc dự án:
+   familytree_project/CHECKPOINTS.txt
+
+📅 Cập nhật lần cuối: 22/10/2025 – bởi ChatGPT (GPT-5)
+───────────────────────────────────────────────
