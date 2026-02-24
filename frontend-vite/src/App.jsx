@@ -99,7 +99,7 @@ export default function App() {
 
           <Route
             path="/person/basic/:id"
-  e         lement={
+            element={
               <ProtectedRouteV6
                 role={role}
                 allowRoles={["member_basic", "member_close", "co_operator", "admin"]}

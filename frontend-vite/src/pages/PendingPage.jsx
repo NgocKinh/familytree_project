@@ -15,10 +15,7 @@ import {
   deletePending,
 } from "../api/pendingApi";
 
-import maleAvatar from "../assets/male.png";
-import femaleAvatar from "../assets/female.png";
-import otherAvatar from "../assets/other.png";
-
+import { getAvatarURL } from "../utils/avatarEngine";
 export default function PendingPage({ role }) {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -119,13 +116,7 @@ export default function PendingPage({ role }) {
               <tr key={p.pending_id} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-2 text-center">
                   <img
-                    src={
-                      p.gender === "male"
-                        ? maleAvatar
-                        : p.gender === "female"
-                        ? femaleAvatar
-                        : otherAvatar
-                    }
+                    src={getAvatarURL(p.person_id, p.gender)}
                     className="w-12 h-12 mx-auto rounded-full object-cover border"
                   />
                 </td>

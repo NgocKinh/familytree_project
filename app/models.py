@@ -10,7 +10,7 @@ class Person(Base):
     father_id = Column(Integer, ForeignKey("person.id"), nullable=True)
     mother_id = Column(Integer, ForeignKey("person.id"), nullable=True)
     name = Column(String, nullable=True)
-
+    avatar_path = Column(String(255), nullable=True)
 class Spouse(Base):
     __tablename__ = "spouse"
 

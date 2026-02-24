@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { addPerson, updatePerson } from "../api/personApi";
-import maleAvatar from "../assets/male.png";
-import femaleAvatar from "../assets/female.png";
-import otherAvatar from "../assets/other.png";
+
+import { getAvatarURL } from "../utils/avatarEngine";
 
 const PersonForm = ({ initialData = {}, onSubmit, role = "viewer", mode = "add" }) => {
   const [formData, setFormData] = useState({
@@ -61,12 +60,6 @@ const PersonForm = ({ initialData = {}, onSubmit, role = "viewer", mode = "add" 
     }
   };
 
-  const getDefaultAvatar = () => {
-    if (formData.avatar) return formData.avatar;
-    if (formData.gender === "male") return maleAvatar;
-    if (formData.gender === "female") return femaleAvatar;
-    return otherAvatar;
-  };
 
   return (
     <form
@@ -81,7 +74,11 @@ const PersonForm = ({ initialData = {}, onSubmit, role = "viewer", mode = "add" 
         {/* Cột avatar */}
         <div className="col-span-1 flex flex-col items-center space-y-3">
           <img
-            src={getDefaultAvatar()}
+            src={
+              formData.avatar
+                ? formData.avatar
+                : getAvatarURL(formData.person_id || 0, formData.gender)
+            }
             alt="avatar"
             className="w-32 h-32 object-cover rounded-full border"
           />

@@ -13,9 +13,7 @@ import {
   uploadAvatar,
 } from "../../api/personApi";
 
-import maleAvatar from "../../assets/male.png";
-import femaleAvatar from "../../assets/female.png";
-import otherAvatar from "../../assets/other.png";
+import { getAvatarURL } from "../../utils/avatarEngine";
 
 import {
   formatDateVN,
@@ -101,14 +99,10 @@ export default function PersonBasicForm({ role, onSaved }) {
   // =========================
   // AVATAR
   // =========================
-  const fallbackGender = (gender) => {
-    if (gender === "male") return maleAvatar;
-    if (gender === "female") return femaleAvatar;
-    return otherAvatar;
-  };
 
   const displayAvatar =
-    avatarPreview || fallbackGender(form.gender);
+    avatarPreview ||
+    getAvatarURL(id || 0, form.gender);
 
   // =========================
   // HANDLE CHANGE

@@ -150,6 +150,7 @@ def get_person_basic_list():
                 birth_date,
                 death_date,
                 avatar,
+                avatar_path, 
                 delete_status
             FROM person
             WHERE delete_status = 0
@@ -201,7 +202,7 @@ def get_person_basic_by_id(id):
                 p.birth_date,
                 p.death_date,
                 p.avatar,
-
+                p.avatar_path,
                 MAX(CASE WHEN pc.type = 'FATHER' THEN pc.parent_id END) AS father_id,
                 MAX(CASE WHEN pc.type = 'MOTHER' THEN pc.parent_id END) AS mother_id
 
