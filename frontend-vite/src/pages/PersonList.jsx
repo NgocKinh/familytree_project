@@ -26,6 +26,7 @@ import {
 } from "../utils/avatarEngine";
 
 export default function PersonList({ role }) {
+  console.log("🚨 THIS IS THE FRONTEND I AM EDITING 🚨");
   const [persons, setPersons] = useState([]);
   const [activeTab, setActiveTab] = useState("active"); 
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function PersonList({ role }) {
   // LOAD DATA
   // ======================================================
   useEffect(() => {
+    console.log("🔥 PersonList mounted");
     fetchPersons();
   }, []);
 

@@ -7,13 +7,14 @@
 // =======================================================
 
 import axios from "axios";
-
+import { API_FASTAPI } from "./apiConfig";
+console.log("API_FASTAPI =", API_FASTAPI);
 // ============================================
 // BASE URL (KHÔNG ĐƯỢC ĐỔI nếu backend giữ nguyên)
 // ============================================
-const PERSON_URL = "http://127.0.0.1:5000/api/person/"; // Danh sách
-const API_URL    = "http://127.0.0.1:5000/api/person";  // Prefix chung
-const AVATAR_URL = "http://127.0.0.1:5000/api/avatar/upload"; // Upload avatar
+const PERSON_URL = `${API_FASTAPI}/person/basic`;
+const API_URL    = `${API_FASTAPI}/person`;
+const AVATAR_URL = `${API_FASTAPI}/avatar/upload`;
 
 // ============================================
 // LẤY DANH SÁCH PERSON

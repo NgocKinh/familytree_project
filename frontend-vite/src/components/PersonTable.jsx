@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { formatGender } from "../utils/format";
+import { API_FASTAPI } from "../api/apiConfig";
+import { API_BASE_URL } from "../api/apiConfig";
 
 export default function PersonTable() {
   const [persons, setPersons] = useState([]);
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/person")
+      .get(`${API_FASTAPI}/person/basic`)
       .then((res) => {
         console.log("API trả về:", res.data);
         setPersons(res.data);
@@ -147,21 +149,3 @@ export default function PersonTable() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
