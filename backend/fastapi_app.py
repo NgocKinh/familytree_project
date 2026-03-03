@@ -5,9 +5,14 @@ import os
 
 app = FastAPI(title="FamilyTree API")
 
-# Static
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
+# Static (production safe absolute path)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(BASE_DIR, "static")),
+    name="static"
+)
+    
 # CORS
 ENV = os.environ.get("FLASK_ENV", "development")
 
@@ -31,8 +36,14 @@ app.add_middleware(
 # REGISTER ROUTERS
 # ==============================
 from api.person_basic import router as person_basic_router
+from api.marriage_fastapi import router as marriage_router
+from api.parent_child_fastapi import router as parent_child_router
+from api.avatar import router as avatar_router
 
 app.include_router(person_basic_router)
+app.include_router(marriage_router)
+app.include_router(parent_child_router)
+app.include_router(avatar_router)
 
 @app.get("/")
 def root():

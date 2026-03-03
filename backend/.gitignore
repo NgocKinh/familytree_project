@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Database files
+*.sqlite3
+*.db
+
+# OS files
+Thumbs.db
+
+# Node
+node_modules/
