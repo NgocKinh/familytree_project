@@ -72,7 +72,7 @@ export default function MarriageForm({ role = "admin", editId = null, onBack }) 
         const list = await getPersonBasicList();
 
         const sorted = [...list]
-          .filter((p) => Number(p.delete_status) === 0)
+          .filter((p) => p.delete_status === undefined || Number(p.delete_status) === 0)
           .sort((a, b) => {
             const ay = a.birth_date ? Number(a.birth_date.slice(0, 4)) : 0;
             const by = b.birth_date ? Number(b.birth_date.slice(0, 4)) : 0;
@@ -201,17 +201,19 @@ export default function MarriageForm({ role = "admin", editId = null, onBack }) 
     try {
       let res;
       if (editId) {
+        console.log("🟦 EDIT ID:", editId);
         res = await updateMarriage(editId, {
           spouse_a_id,
           spouse_b_id,
           start_date: start_iso,
           end_date: end_iso,
           status,
-          ceremony_type,
+          ceremony_type: ceremony_type || null,
           location,
           notes,
           consanguineous,
         });
+
       } else {
         res = await addMarriage({
           spouse_a_id,
@@ -219,7 +221,7 @@ export default function MarriageForm({ role = "admin", editId = null, onBack }) 
           start_date: start_iso,
           end_date: end_iso,
           status,
-          ceremony_type,
+          ceremony_type: ceremony_type || null,
           location,
           notes,
           consanguineous,
@@ -229,8 +231,16 @@ export default function MarriageForm({ role = "admin", editId = null, onBack }) 
       }
 
       setSuccessMsg(res.message || "✅ Lưu quan hệ hôn nhân thành công!");
+
+      if (editId && onBack) {
+        setTimeout(() => {
+          onBack();   // quay lại danh sách
+        }, 500);      // đợi 0.5s cho user thấy thông báo
+      }
+
     } catch (err) {
       const msg =
+        err.response?.data?.detail ||
         err.response?.data?.error ||
         err.response?.data?.warning ||
         "❌ Không thể lưu quan hệ hôn nhân!";
@@ -338,18 +348,23 @@ export default function MarriageForm({ role = "admin", editId = null, onBack }) 
           />
         </div>
 
-        {/* Toggle lọc giới tính */}
-        <div className="flex items-center space-x-2 mt-2">
+        {/* Cùng huyết thống */}
+        <div className="flex items-center space-x-2 mt-3">
           <input
             type="checkbox"
-            checked={filterHusbandGender}
-            onChange={(e) => {
-              const checked = e.target.checked;
-              setFilterHusbandGender(checked);
-              setFilterWifeGender(checked);
-            }}
+            id="consanguineous"
+            checked={Number(formData.consanguineous) === 1}
+            onChange={(e) =>
+              handleChange("consanguineous", e.target.checked ? 1 : 0)
+            }
+            className="w-4 h-4 accent-red-600 cursor-pointer"
           />
-          <span className="font-medium text-gray-700">Cùng huyết thống</span>
+          <label
+            htmlFor="consanguineous"
+            className="font-medium text-gray-700 cursor-pointer"
+          >
+            Cùng huyết thống (≤ 5 đời)
+          </label>
         </div>
 
         {/* Thông báo */}
