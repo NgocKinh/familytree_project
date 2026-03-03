@@ -12,7 +12,7 @@ console.log("API_FASTAPI =", API_FASTAPI);
 // ============================================
 // BASE URL (KHÔNG ĐƯỢC ĐỔI nếu backend giữ nguyên)
 // ============================================
-const PERSON_URL = `${API_FASTAPI}/person/basic`;
+const PERSON_URL = `${API_FASTAPI}/api/person/basic`;
 const API_URL    = `${API_FASTAPI}/person`;
 const AVATAR_URL = `${API_FASTAPI}/avatar/upload`;
 

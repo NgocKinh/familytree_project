@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../../api/apiConfig";
 import PersonDropdown from "../common/PersonDropdown";
 
 function AssignParentForm() {
@@ -30,18 +31,18 @@ function AssignParentForm() {
   const [hasMother, setHasMother] = useState(false);
   const [lockForm, setLockForm] = useState(false);
   useEffect(() => {
-    axios.get("/api/person/for-person-dropdown")
+    axios.get(`${API_BASE_URL}/person/for-person-dropdown`)
       .then(res => setPersons(res.data || []))
       .catch(() => setPersons([]));
 
-    axios.get("/api/marriage")
+    axios.get(`${API_BASE_URL}/marriage`)
       .then(res => setMarriages(res.data || []))
       .catch(() => setMarriages([]));
   }, []);
 
   const checkParentStatus = async (id) => {
     try {
-      const res = await axios.get(`/api/child/${id}/parents-status`);
+      const res = await axios.get(`${API_BASE_URL}/child/${id}/parents-status`);
       const { has_father, has_mother } = res.data;
 
       setHasFather(has_father);
@@ -82,7 +83,7 @@ function AssignParentForm() {
           return;
         }
 
-        await axios.post("/api/clean/parent", {
+        await axios.post(`${API_BASE_URL}/clean/parent`, {
           child_id: Number(childId),
           parent_id: Number(parentId),
           type,
@@ -101,7 +102,7 @@ function AssignParentForm() {
         }
 
         // CHA
-        await axios.post("/api/clean/parent", {
+        await axios.post(`${API_BASE_URL}/clean/parent`, {
           child_id: Number(childId),
           parent_id: m.spouse_a_id,
           type: "FATHER",
@@ -109,7 +110,7 @@ function AssignParentForm() {
         });
 
         // MẸ
-        await axios.post("/api/clean/parent", {
+        await axios.post(`${API_BASE_URL}/clean/parent`, {
           child_id: Number(childId),
           parent_id: m.spouse_b_id,
           type: "MOTHER",
@@ -334,4 +335,3 @@ function AssignParentForm() {
 }
 
 export default AssignParentForm;
-

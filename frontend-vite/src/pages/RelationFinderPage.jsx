@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { makeApiUrl } from "../api/apiConfig";
 import PersonDropdown from "../components/common/PersonDropdown";
 
 function RelationFinderPage() {
@@ -18,7 +19,9 @@ function RelationFinderPage() {
   useEffect(() => {
     async function fetchPersons() {
       try {
-        const res = await axios.get("/api/person/for-person-dropdown")
+        const res = await axios.get(
+          makeApiUrl("/person/for-person-dropdown")
+        )
         console.log("PERSON API RESPONSE", res.data);
         console.log("PERSON CÓ NĂM SINH", res.data.find(p => p.birth_date !== null));
         const personsActive = res.data;
@@ -84,7 +87,9 @@ function RelationFinderPage() {
 
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/relationship?source_id=${parseInt(personB)}&target_id=${parseInt(personA)}`
+        makeApiUrl(
+          `/relationship?source_id=${parseInt(personB)}&target_id=${parseInt(personA)}`
+        )
       );
 
       console.log("RELATION RESPONSE", res.data);

@@ -2,12 +2,12 @@
 // personBasicApi.js (v3.0-CLEAN-FINAL)
 // - Trả về danh sách thành viên đầy đủ từ backend
 // - Dùng chung cho ParentChildForm, MarriageForm, RelationFinder
-// - API CHUẨN: /api/person/
+// - API CHUẨN: /person/
 // ===================================================================
 import axios from "axios";
 import { API_BASE_URL } from "./apiConfig";
 
-const PERSON_URL = `${API_BASE_URL}/person/basic`;
+const PERSON_URL = `${API_BASE_URL}/person/for-person-dropdown`;
 
 export const getPersonBasicList = async () => {
   try {

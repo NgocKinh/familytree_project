@@ -9,7 +9,7 @@ export default function PersonTable() {
 
   useEffect(() => {
     axios
-      .get(`${API_FASTAPI}/person/basic`)
+      .get(`${API_FASTAPI}/api/person/basic`)
       .then((res) => {
         console.log("API trả về:", res.data);
         setPersons(res.data);

@@ -66,11 +66,14 @@ export default function PersonSelectWithAvatarV2({
   // ==========================================
   const filteredPersons = persons.filter((p) => {
     if (filterOn && effectiveGender) {
-      return p.gender === effectiveGender;
+      return (p.gender || "").toLowerCase().trim() === effectiveGender;
     }
     return true;
   });
-
+  console.log("TOTAL PERSONS:", persons.length);
+  console.log("FILTERED COUNT:", filteredPersons.length);
+  console.log("EFFECTIVE GENDER:", effectiveGender);
+  console.log("FILTER ON:", filterOn);
   // ==========================================
   // Format tên: Fullname + lifespan
   // ==========================================

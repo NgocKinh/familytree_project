@@ -12,19 +12,22 @@ export default function PersonDropdown({
     const list = filterFn ? persons.filter(filterFn) : persons;
 
     const sortedPersons = [...list].sort((a, b) => {
-        if (!a.birth_date && !b.birth_date) {
-            return a.full_name_vn.localeCompare(b.full_name_vn, "vi");
-        }
+    const nameA = (a.full_name_vn || "").toString();
+    const nameB = (b.full_name_vn || "").toString();
 
-        if (!a.birth_date) return 1;
-        if (!b.birth_date) return -1;
+    if (!a.birth_date && !b.birth_date) {
+        return nameA.localeCompare(nameB, "vi");
+    }
 
-        if (a.birth_date !== b.birth_date) {
-            return new Date(b.birth_date) - new Date(a.birth_date);
-        }
+    if (!a.birth_date) return 1;
+    if (!b.birth_date) return -1;
 
-        return a.full_name_vn.localeCompare(b.full_name_vn, "vi");
-    });
+    if (a.birth_date !== b.birth_date) {
+        return new Date(b.birth_date) - new Date(a.birth_date);
+    }
+
+    return nameA.localeCompare(nameB, "vi");
+});
 
     return (
         <div>
@@ -55,10 +58,13 @@ export default function PersonDropdown({
                                 : "Khác";
 
                     const display =
-                        `${p.full_name_vn} — ${genderLabel} (${birthYear})`;
+                        `${p.full_name_vn || ""} — ${genderLabel} (${birthYear})`;
 
                     return (
-                        <option key={p.person_id} value={p.person_id}>
+                        <option
+                            key={`${p.person_id}-${p.full_name_vn || "noname"}`}
+                            value={p.person_id}
+                        >
                             {display}
                         </option>
                     );
