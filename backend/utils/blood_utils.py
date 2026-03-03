@@ -7,87 +7,78 @@ from db import get_connection
 # ------------------------------------------------
 # 🔹 Hàm: cập nhật mã blood_code cho 1 người con
 # ------------------------------------------------
-def update_blood_code(child_id):
+def update_blood_code(conn, child_id):
     """
-    Tự động tính mã huyết thống dạng father_id|mother_id
-    và ghi vào person.blood_code.
-    Đồng thời sao lưu vào bảng person_gene_backup.
+    Tính và cập nhật blood_code cho 1 người con.
+    Không commit / rollback / close connection.
     """
-    conn = get_connection()
+
     cur = conn.cursor(dictionary=True)
 
-    try:
-        # 🔹 Lấy cha và mẹ từ bảng parent_child
-        cur.execute("""
-            SELECT 
-                MAX(CASE WHEN type='father' THEN parent_id END) AS father_id,
-                MAX(CASE WHEN type='mother' THEN parent_id END) AS mother_id
-            FROM parent_child
-            WHERE child_id = %s;
-        """, (child_id,))
-        row = cur.fetchone()
+    # 🔹 Lấy cha và mẹ từ bảng parent_child
+    cur.execute("""
+        SELECT 
+            MAX(CASE WHEN type='FATHER' THEN parent_id END) AS father_id,
+            MAX(CASE WHEN type='MOTHER' THEN parent_id END) AS mother_id
+        FROM parent_child
+        WHERE child_id = %s;
+    """, (child_id,))
 
-        if not row:
-            print(f"⚠️ Không tìm thấy cha/mẹ cho child_id={child_id}")
-            return
+    row = cur.fetchone()
 
-        father_id = row["father_id"] or 0
-        mother_id = row["mother_id"] or 0
-        blood_code = f"{father_id}|{mother_id}"
-
-        # 🔹 Cập nhật vào bảng person
-        cur.execute("""
-            UPDATE person
-            SET blood_code = %s
-            WHERE person_id = %s;
-        """, (blood_code, child_id))
-
-        # 🔹 Sao lưu vào bảng person_gene_backup
-        cur.execute("""
-            INSERT INTO person_gene_backup (person_id, blood_code, backup_time)
-            VALUES (%s, %s, NOW());
-        """, (child_id, blood_code))
-
-        conn.commit()
-        print(f"✅ Cập nhật blood_code cho ID={child_id}: {blood_code}")
-
-    except Exception as e:
-        print("❌ Lỗi khi cập nhật blood_code:", e)
-        conn.rollback()
-
-    finally:
+    if not row:
+        print(f"⚠️ Không tìm thấy cha/mẹ cho child_id={child_id}")
         cur.close()
-        conn.close()
+        return
+
+    father_id = row["father_id"] or 0
+    mother_id = row["mother_id"] or 0
+    blood_code = f"{father_id}|{mother_id}"
+
+    # 🔹 Cập nhật vào bảng person
+    cur.execute("""
+        UPDATE person
+        SET blood_code = %s
+        WHERE person_id = %s;
+    """, (blood_code, child_id))
+
+    # 🔹 Sao lưu
+    cur.execute("""
+        INSERT INTO person_gene_backup (person_id, blood_code, backup_time)
+        VALUES (%s, %s, NOW());
+    """, (child_id, blood_code))
+
+    print(f"✅ Blood_code updated for ID={child_id}: {blood_code}")
+
+    cur.close()
 
 
 # ------------------------------------------------
 # 🔹 Hàm: tái tính toàn bộ blood_code
 # ------------------------------------------------
 def rebuild_all_blood_codes():
-    """
-    Quét toàn bộ bảng parent_child để cập nhật lại mã blood_code
-    cho tất cả người con.
-    """
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
     try:
         cur.execute("SELECT DISTINCT child_id FROM parent_child;")
         all_children = [row["child_id"] for row in cur.fetchall()]
-        print(f"🔄 Bắt đầu tái tính cho {len(all_children)} người con...")
+
+        print(f"🔄 Rebuilding {len(all_children)} blood codes...")
 
         for cid in all_children:
-            update_blood_code(cid)
+            update_blood_code(conn, cid)
 
-        print("✅ Hoàn tất tái tính toàn bộ blood_code.")
+        conn.commit()
+        print("✅ Rebuild completed.")
 
     except Exception as e:
-        print("❌ Lỗi khi tái tính blood_code hàng loạt:", e)
+        print("❌ Error rebuilding blood codes:", e)
+        conn.rollback()
 
     finally:
         cur.close()
         conn.close()
-
 
 # ------------------------------------------------
 # 🔹 Test nhanh

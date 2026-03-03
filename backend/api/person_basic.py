@@ -7,9 +7,15 @@
 #   - Không thay đổi logic insert/update/delete
 # ==========================================================
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import JSONResponse
 from fastapi import Request
+from schemas.person_basic import (
+    PersonBasicCreate,
+    PersonBasicUpdate,
+    RestoreRequest,
+    RoleEnum
+)
 from mysql.connector import Error
 from db_helper import get_connection, close_connection
 import os
@@ -61,8 +67,8 @@ def safe_avatar_file(gender, avatar_value, person_id=None):
         '5.jpg'
         hoặc 'default_male.png'
     """
-    static_dir = os.path.abspath(os.path.join("backend", "static", "avatars"))
-
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    static_dir = os.path.join(BASE_DIR, "static", "avatars")
     default_map = {
         "male": "default_male.png",
         "female": "default_female.png",
@@ -95,10 +101,9 @@ def safe_avatar_file(gender, avatar_value, person_id=None):
 # 🔎 CHECK DUPLICATE
 # ==========================================================
 @router.post("/api/person/check_duplicate")
-async def check_duplicate_person(request: Request):
+async def check_duplicate_person(data: dict = Body(...)):
     conn, cursor = None, None
     try:
-        data = await request.json()
         last_name = (data.get("last_name") or "").strip()
         first_name = (data.get("first_name") or "").strip()
         gender = (data.get("gender") or "").strip().lower()
@@ -141,35 +146,30 @@ def get_person_basic_list():
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT COUNT(*) FROM person WHERE birth_date IS NOT NULL;")
-        print("FLASK NON NULL COUNT:", cursor.fetchone())
-        cursor.execute("SELECT @@datadir;")
-        print("FLASK DATADIR:", cursor.fetchone())
+
         cursor.execute(
             """
             SELECT
                 person_id,
                 sur_name,
-                middle_name,
                 last_name,
+                middle_name,                
                 first_name,
                 gender,
                 birth_date,
                 death_date,
-                avatar,
-                avatar_path, 
-                delete_status
+                avatar
             FROM person
             WHERE delete_status = 0
             ORDER BY
-                birth_date IS NOT NULL ASC,
+                birth_date IS NULL DESC,
                 birth_date ASC,
-                first_name ASC;
+                first_name ASC
         """
         )
 
         rows = cursor.fetchall() or []
-        print("DEBUG ROWS:", rows[:2])
+
         for row in rows:
             row["birth_date"] = to_iso(row.get("birth_date"))
             row["death_date"] = to_iso(row.get("death_date"))
@@ -181,7 +181,7 @@ def get_person_basic_list():
         return rows
 
     except Error as e:
-        print("❌ SQL ERROR:", e)
+        print("❌ DROPDOWN SQL ERROR:", e)
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         close_connection(conn, cursor)
@@ -202,14 +202,13 @@ def get_person_basic_by_id(id):
             SELECT
                 p.person_id AS id,
                 p.sur_name,
-                p.middle_name,
                 p.last_name,
+                p.middle_name,                
                 p.first_name,
                 p.gender,
                 p.birth_date,
                 p.death_date,
                 p.avatar,
-                p.avatar_path,
                 MAX(CASE WHEN pc.type = 'FATHER' THEN pc.parent_id END) AS father_id,
                 MAX(CASE WHEN pc.type = 'MOTHER' THEN pc.parent_id END) AS mother_id
 
@@ -244,11 +243,14 @@ def get_person_basic_by_id(id):
 # ➕ ADD PERSON
 # ==========================================================
 @router.post("/api/person/basic")
-async def add_person_basic(request: Request):
+async def add_person_basic(data: PersonBasicCreate):
     conn, cursor = None, None
     try:
-        data = await request.json()
-        role = (data.get("role") or "").lower()
+        role = data.role.value
+        if role not in ["member_basic", "member_close", "co_operator", "admin"]:
+            raise HTTPException(
+                status_code=403, detail="Không có quyền thực hiện thao tác này."
+            )
 
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -263,7 +265,7 @@ async def add_person_basic(request: Request):
               AND delete_status=0
             LIMIT 1
         """,
-            (data.get("last_name"), data.get("first_name"), data.get("gender")),
+            (data.last_name, data.first_name, data.gender),
         )
 
         exists = cursor.fetchone()
@@ -282,19 +284,26 @@ async def add_person_basic(request: Request):
             ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,0,NOW(),NOW())
         """,
             (
-                data.get("sur_name"),
-                data.get("middle_name"),
-                data.get("last_name"),
-                data.get("first_name"),
-                data.get("gender"),
-                data.get("birth_date"),
-                data.get("death_date"),
-                data.get("avatar"),
+                data.sur_name,
+                data.middle_name,
+                data.last_name,
+                data.first_name,
+                data.gender,
+                data.birth_date,
+                data.death_date,
+                data.avatar,
             ),
         )
 
         conn.commit()
-        return {"message": "OK"}
+
+        return JSONResponse(
+            status_code=201,
+            content={
+                "id": cursor.lastrowid,
+                "message": "Created"
+            }
+        )
 
     except Error as e:
         if conn:
@@ -306,75 +315,193 @@ async def add_person_basic(request: Request):
 
 
 # ==========================================================
-# ✏️ UPDATE
+# ✏️ UPDATE (SAFE PARTIAL UPDATE)
 # ==========================================================
 @router.put("/api/person/basic/{id}")
-async def update_person_basic(id: int, request: Request):
+async def update_person_basic(id: int, data: PersonBasicUpdate):
     conn, cursor = None, None
     try:
-        data = await request.json()
-
         conn = get_connection()
         cursor = conn.cursor()
+
+        # Chỉ lấy field được gửi lên
+        update_data = data.dict(exclude_unset=True)
+
+        if not update_data:
+            raise HTTPException(status_code=400, detail="Không có dữ liệu để cập nhật")
+
+        fields = []
+        values = []
+
+        for key, value in update_data.items():
+            fields.append(f"{key}=%s")
+            values.append(value)
+
+        values.append(id)
+
+        sql = f"""
+            UPDATE person
+            SET {', '.join(fields)}, updated_at=NOW()
+            WHERE person_id=%s
+        """
+
+        cursor.execute(sql, values)
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Không tìm thấy person")
+
+        conn.commit()
+
+        return {"id": id, "message": "Updated"}
+
+    except Error as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        close_connection(conn, cursor)
+
+# ==========================================================
+# 📌 GET FOR PERSON DROPDOWN
+# ==========================================================
+@router.get("/api/person/for-person-dropdown")
+def get_person_for_dropdown():
+    conn, cursor = None, None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
         cursor.execute(
             """
-            UPDATE person
-            SET sur_name=%s,
-                middle_name=%s,
-                last_name=%s,
-                first_name=%s,
-                gender=%s,
-                birth_date=%s,
-                death_date=%s,
-                avatar=%s,
-                updated_at=NOW()
-            WHERE person_id=%s
-        """,
-            (
-                data.get("sur_name"),
-                data.get("middle_name"),
-                data.get("last_name"),
-                data.get("first_name"),
-                data.get("gender"),
-                data.get("birth_date"),
-                data.get("death_date"),
-                data.get("avatar"),
-                id,
-            ),
+            SELECT
+                person_id,
+                sur_name,
+                last_name,
+                middle_name,               
+                first_name,
+                gender,
+                birth_date
+            FROM person
+            WHERE delete_status = 0
+            ORDER BY
+                birth_date IS NULL DESC,
+                birth_date ASC,
+                first_name ASC
+            """
         )
 
-        conn.commit()
-        return {"message": "OK"}
+        rows = cursor.fetchall() or []
+
+        for row in rows:
+            row["birth_date"] = to_iso(row.get("birth_date"))
+
+            # Tạo full_name_vn giống frontend đang dùng
+            row["full_name_vn"] = " ".join(
+                filter(
+                    None,
+                    [
+                        row.get("sur_name"),
+                        row.get("last_name"),
+                        row.get("middle_name"),
+                        row.get("first_name"),
+                    ],
+                )
+            )
+
+        return rows
 
     except Error as e:
-        if conn:
-            conn.rollback()
-        print("❌ UPDATE ERROR:", e)
+        print("❌ DROPDOWN SQL ERROR:", e)
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         close_connection(conn, cursor)
 
 
 # ==========================================================
-# 🗑 SOFT DELETE
+# 🗑 SOFT DELETE (SAFE)
 # ==========================================================
 @router.delete("/api/person/basic/{id}")
-def delete_person_basic(id):
+def delete_person_basic(id: int):
     conn, cursor = None, None
     try:
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("UPDATE person SET delete_status=1 WHERE person_id=%s", (id,))
+        # Kiểm tra tồn tại
+        cursor.execute(
+            "SELECT delete_status FROM person WHERE person_id=%s",
+            (id,)
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="Không tìm thấy person")
+
+        if row["delete_status"] == 1:
+            raise HTTPException(status_code=409, detail="Person đã bị xóa trước đó")
+
+        # Soft delete
+        cursor.execute(
+            "UPDATE person SET delete_status=1, updated_at=NOW() WHERE person_id=%s",
+            (id,)
+        )
+
         conn.commit()
 
-        return {"message": "🟡 Đã ẩn tạm"}
+        return {"id": id, "message": "Deleted (soft)"}
 
     except Error as e:
         if conn:
             conn.rollback()
-        print("❌ DELETE ERROR:", e)
         raise HTTPException(status_code=500, detail=str(e))
+
     finally:
         close_connection(conn, cursor)
+
+# ==========================================================
+# ♻️ RESTORE (ROLE CHECK)
+# ==========================================================
+@router.put("/api/person/basic/{id}/restore")
+async def restore_person_basic(id: int, data: RestoreRequest):
+    conn, cursor = None, None
+    try:
+        # Check quyền
+        if data.role not in [RoleEnum.co_operator, RoleEnum.admin]:
+            raise HTTPException(status_code=403, detail="Không có quyền khôi phục")
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Kiểm tra tồn tại
+        cursor.execute(
+            "SELECT delete_status FROM person WHERE person_id=%s",
+            (id,)
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="Không tìm thấy person")
+
+        if row["delete_status"] == 0:
+            raise HTTPException(status_code=409, detail="Person chưa bị xóa")
+
+        # Restore
+        cursor.execute(
+            "UPDATE person SET delete_status=0, updated_at=NOW() WHERE person_id=%s",
+            (id,)
+        )
+
+        conn.commit()
+
+        return {"id": id, "message": "Restored"}
+
+    except Error as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        close_connection(conn, cursor)
+
+

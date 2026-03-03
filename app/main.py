@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from app.core.relationship_resolver import RelationshipResolver
 from fastapi.middleware.cors import CORSMiddleware
-
+from api.marriage_fastapi import router as marriage_router
+from api.person_basic import router as person_router
 import logging
 
 # Cấu hình logging toàn hệ thống
@@ -18,7 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.include_router(person_router)
+app.include_router(marriage_router)
 # Tạo resolver 1 lần (không tạo mỗi request)
 resolver = RelationshipResolver()
 
